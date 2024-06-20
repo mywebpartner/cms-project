@@ -1,0 +1,238 @@
+﻿using ContentManagementSystemWebAPI.Models;
+using ContentManagementSystemWebAPI.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace ContentManagementSystemWebAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CMSwebapiController : ControllerBase
+    {
+        private readonly ContentManagementSystemContext context;
+
+        public CMSwebapiController(ContentManagementSystemContext context)
+        {
+            this.context = context;
+        }
+
+        public class ApiResponse
+        {
+            public object Result { get; set; }
+            public string Message { get; set; }
+        }
+
+        [HttpGet("articles")]
+        public async Task<ActionResult<ApiResponse>> GetArticles()
+        {
+            var articles = await this.context.Articles.ToListAsync();
+            return Ok(new ApiResponse { Message = "Articles", Result = articles });
+        }
+
+        [HttpGet("articles/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetArticle(int id)
+        {
+            var article = await this.context.Articles.FindAsync(id);
+            if (article == null)
+            {
+                return NotFound(new ApiResponse { Message = "Article not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Article", Result = article });
+        }
+
+        [HttpGet("articlecategories")]
+        public async Task<ActionResult<ApiResponse>> GetArticleCategories()
+        {
+            var categories = await this.context.ArticleCategories.ToListAsync();
+            return Ok(new ApiResponse { Message = "ArticleCategories", Result = categories });
+        }
+
+        [HttpGet("articlecategories/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetArticleCategory(int id)
+        {
+            var category = await this.context.ArticleCategories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound(new ApiResponse { Message = "ArticleCategory not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "ArticleCategory", Result = category });
+        }
+
+        [HttpGet("categories")]
+        public async Task<ActionResult<ApiResponse>> GetCategories()
+        {
+            var categories = await this.context.Categories.ToListAsync();
+            return Ok(new ApiResponse { Message = "Categories", Result = categories });
+        }
+
+        [HttpGet("categories/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetCategory(int id)
+        {
+            var category = await this.context.Categories.FindAsync(id);
+            if (category == null)
+            {
+                return NotFound(new ApiResponse { Message = "Category not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Category", Result = category });
+        }
+
+        [HttpGet("comments")]
+        public async Task<ActionResult<ApiResponse>> GetComments()
+        {
+            var comments = await this.context.Comments.ToListAsync();
+            return Ok(new ApiResponse { Message = "Comments", Result = comments });
+        }
+
+        [HttpGet("comments/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetComment(int id)
+        {
+            var comment = await this.context.Comments.FindAsync(id);
+            if (comment == null)
+            {
+                return NotFound(new ApiResponse { Message = "Comment not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Comment", Result = comment });
+        }
+
+        [HttpGet("permissions")]
+        public async Task<ActionResult<ApiResponse>> GetPermissions()
+        {
+            var permissions = await this.context.Permissions.ToListAsync();
+            return Ok(new ApiResponse { Message = "Permissions", Result = permissions });
+        }
+
+        [HttpGet("permissions/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetPermission(int id)
+        {
+            var permission = await this.context.Permissions.FindAsync(id);
+            if (permission == null)
+            {
+                return NotFound(new ApiResponse { Message = "Permission not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Permission", Result = permission });
+        }
+
+        [HttpGet("roles")]
+        public async Task<ActionResult<ApiResponse>> GetRoles()
+        {
+            var roles = await this.context.Roles.ToListAsync();
+            return Ok(new ApiResponse { Message = "Roles", Result = roles });
+        }
+
+        [HttpGet("roles/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetRole(int id)
+        {
+            var role = await this.context.Roles.FindAsync(id);
+            if (role == null)
+            {
+                return NotFound(new ApiResponse { Message = "Role not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Role", Result = role });
+        }
+
+        [HttpGet("tags")]
+        public async Task<ActionResult<ApiResponse>> GetTags()
+        {
+            var tags = await this.context.Tags.ToListAsync();
+            return Ok(new ApiResponse { Message = "Tags", Result = tags });
+        }
+
+        [HttpGet("tags/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetTag(int id)
+        {
+            var tag = await this.context.Tags.FindAsync(id);
+            if (tag == null)
+            {
+                return NotFound(new ApiResponse { Message = "Tag not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Tag", Result = tag });
+        }
+
+        [HttpGet("users")]
+        public async Task<ActionResult<ApiResponse>> GetUsers()
+        {
+            var users = await this.context.Users.ToListAsync();
+            return Ok(new ApiResponse { Message = "Users", Result = users });
+        }
+
+        [HttpGet("users/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetUser(int id)
+        {
+            var user = await this.context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse { Message = "User not found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "User", Result = user });
+        }
+
+        [HttpPost("users")]
+        public async Task<ActionResult<ApiResponse>> CreateUser([FromBody] UserDto createUserDto)
+        {
+            var existingUser = await this.context.Users.FirstOrDefaultAsync(u => u.Email == createUserDto.Email);
+            if (existingUser != null)
+            {
+                return BadRequest(new ApiResponse { Message = "Email address already exists", Result = null });
+            }
+
+            var user = new User
+            {
+                Username = createUserDto.Username,
+                PasswordHash = createUserDto.PasswordHash,
+                Email = createUserDto.Email,
+                LastLoginTime = createUserDto.LastLoginTime,
+                CreatedAt = createUserDto.CreatedAt ?? DateTime.UtcNow,
+                UpdatedAt = createUserDto.UpdatedAt ?? DateTime.UtcNow
+            };
+
+            this.context.Users.Add(user);
+            await this.context.SaveChangesAsync();
+
+            return Ok(new ApiResponse { Message = "User created successfully", Result = user });
+        }
+
+        [HttpPut("users/{id}")]
+        public async Task<ActionResult<ApiResponse>> UpdateUser(int id, [FromBody] UserDto updateUserDto)
+        {
+
+            var user = await this.context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            user.Username = updateUserDto.Username ?? user.Username;
+            user.PasswordHash = updateUserDto.PasswordHash ?? user.PasswordHash;
+            user.Email = updateUserDto.Email ?? user.Email;
+            user.LastLoginTime = updateUserDto.LastLoginTime ?? user.LastLoginTime;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await this.context.SaveChangesAsync();
+
+            return Ok(new { Message = "User updated successfully", Result = user });
+        }
+
+
+        [HttpDelete("users/{id}")]
+        public async Task<ActionResult<ApiResponse>> DeleteUser(int id)
+        {
+            var user = await this.context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            this.context.Users.Remove(user);
+            await this.context.SaveChangesAsync();
+
+            return Ok(new { Message = "User deleted successfully", Result = user });
+        }
+
+
+
+
+    }
+}
