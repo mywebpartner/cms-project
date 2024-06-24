@@ -231,6 +231,60 @@ namespace ContentManagementSystemWebAPI.Controllers
             return Ok(new { Message = "User deleted successfully", Result = user });
         }
 
+        [HttpPost("articles")]
+        public async Task<ActionResult<ApiResponse>> CreateArticle([FromBody] ContentDto contentDto)
+        {
+            var article = new Article
+            {
+                Title = contentDto.Title,
+                Content = contentDto.Body,
+                Image = contentDto.ImageUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow // Assuming this should be set on creation
+            };
+
+            this.context.Articles.Add(article);
+            await this.context.SaveChangesAsync();
+
+            return Ok(new ApiResponse { Message = "Article created successfully", Result = article });
+        }
+
+
+        [HttpPut("articles/{id}")]
+        public async Task<ActionResult<ApiResponse>> UpdateArticle(int id, [FromBody] ContentDto contentDto)
+        {
+            var article = await this.context.Articles.FindAsync(id);
+            if (article == null)
+            {
+                return NotFound("Article not found");
+            }
+
+            article.Title = contentDto.Title ?? article.Title;
+            article.Content = contentDto.Body ?? article.Content;
+            article.Image = contentDto.ImageUrl ?? article.Image;
+            article.UpdatedAt = DateTime.UtcNow;
+
+            await this.context.SaveChangesAsync();
+
+            return Ok(new ApiResponse { Message = "Article updated successfully", Result = article });
+        }
+
+
+        [HttpDelete("articles/{id}")]
+        public async Task<ActionResult<ApiResponse>> DeleteArticle(int id)
+        {
+            var article = await this.context.Articles.FindAsync(id);
+            if (article == null)
+            {
+                return NotFound("Article not found");
+            }
+
+            this.context.Articles.Remove(article);
+            await this.context.SaveChangesAsync();
+
+            return Ok(new ApiResponse { Message = "Article deleted successfully", Result = article });
+        }
+
 
 
 
