@@ -1,0 +1,23 @@
+<h1>
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+</h1>
+<div *ngIf="!errorMessage">
+<h1>{{title}}</h1>
+<form #userForm="ngForm" (ngSubmit)="getUserFormData(userForm.value)" >
+  <input type="text" required #name="ngModel" pattern="[a-zA-Z]+$"  placeholder="Enter Username" name="Username" ngModel />
+  <br /> 
+  <span *ngIf="name.invalid && name.touched" style="color:red;">Please enter a valid Username</span>
+  <br />
+  <input type="text" required #password="ngModel" minlength="6" placeholder="Enter PasswordHash" name="PasswordHash" ngModel />
+  <br />
+  <span *ngIf="password.invalid && password.touched"  style="color:red;">Please enter a valid PasswordHash</span>
+  <br />
+  <input type="text" required #email="ngModel"  email placeholder="Enter Email" name="Email" ngModel />
+  <br>
+  <span *ngIf="email.invalid && email.touched" style="color:red;">Please enter a valid Email</span>
+  <br>
+  <button  [disabled]="userForm.invalid">Add New user</button>
+</form>
+</div>
