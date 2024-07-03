@@ -2447,11 +2447,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\raghu\\Downloads\\updatearticle\\cms-project\\ContentManagementSystemWebAPI\\ContentManagementSystemWebAPI.csproj",
+      "projectUniqueName": "C:\\Users\\raghu\\Downloads\\search functionality in api\\cms-project\\ContentManagementSystemWebAPI\\ContentManagementSystemWebAPI.csproj",
       "projectName": "ContentManagementSystemWebAPI",
-      "projectPath": "C:\\Users\\raghu\\Downloads\\updatearticle\\cms-project\\ContentManagementSystemWebAPI\\ContentManagementSystemWebAPI.csproj",
+      "projectPath": "C:\\Users\\raghu\\Downloads\\search functionality in api\\cms-project\\ContentManagementSystemWebAPI\\ContentManagementSystemWebAPI.csproj",
       "packagesPath": "C:\\Users\\raghu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\raghu\\Downloads\\updatearticle\\cms-project\\ContentManagementSystemWebAPI\\obj\\",
+      "outputPath": "C:\\Users\\raghu\\Downloads\\search functionality in api\\cms-project\\ContentManagementSystemWebAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\raghu\\AppData\\Roaming\\NuGet\\NuGet.Config",

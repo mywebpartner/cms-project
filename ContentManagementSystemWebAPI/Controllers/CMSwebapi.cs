@@ -185,7 +185,13 @@ namespace ContentManagementSystemWebAPI.Controllers
                 Email = createUserDto.Email,
                 LastLoginTime = createUserDto.LastLoginTime,
                 CreatedAt = createUserDto.CreatedAt ?? DateTime.UtcNow,
-                UpdatedAt = createUserDto.UpdatedAt ?? DateTime.UtcNow
+                UpdatedAt = createUserDto.UpdatedAt ?? DateTime.UtcNow,
+                Mobile = createUserDto.Mobile,
+                Address = createUserDto.Address,
+                StateID = createUserDto.StateID,
+                CountryID = createUserDto.CountryID,
+                CityID = createUserDto.CityID,
+                isActive = createUserDto.isActive ?? true
             };
 
             this.context.Users.Add(user);
@@ -197,24 +203,38 @@ namespace ContentManagementSystemWebAPI.Controllers
         [HttpPut("users/{id}")]
         public async Task<ActionResult<ApiResponse>> UpdateUser(int id, [FromBody] UserDto updateUserDto)
         {
-
             var user = await this.context.Users.FindAsync(id);
             if (user == null)
             {
-                return NotFound("User not found");
+                return NotFound(new ApiResponse { Message = "User not found", Result = null });
+            }
+
+            if (!string.IsNullOrEmpty(updateUserDto.Email) && updateUserDto.Email != user.Email)
+            {
+                var existingUser = await this.context.Users.FirstOrDefaultAsync(u => u.Email == updateUserDto.Email);
+                if (existingUser != null)
+                {
+                    return BadRequest(new ApiResponse { Message = "Email address already exists", Result = null });
+                }
+                user.Email = updateUserDto.Email;
             }
 
             user.Username = updateUserDto.Username ?? user.Username;
             user.PasswordHash = updateUserDto.PasswordHash ?? user.PasswordHash;
             user.Email = updateUserDto.Email ?? user.Email;
             user.LastLoginTime = updateUserDto.LastLoginTime ?? user.LastLoginTime;
+            user.Mobile = updateUserDto.Mobile ?? user.Mobile;
+            user.Address = updateUserDto.Address ?? user.Address;
+            user.StateID = updateUserDto.StateID ?? user.StateID;
+            user.CountryID = updateUserDto.CountryID ?? user.CountryID;
+            user.CityID = updateUserDto.CityID ?? user.CityID;
+            user.isActive = updateUserDto.isActive ?? user.isActive;
             user.UpdatedAt = DateTime.UtcNow;
 
             await this.context.SaveChangesAsync();
 
-            return Ok(new { Message = "User updated successfully", Result = user });
+            return Ok(new ApiResponse { Message = "User updated successfully", Result = user });
         }
-
 
         [HttpDelete("users/{id}")]
         public async Task<ActionResult<ApiResponse>> DeleteUser(int id)
@@ -222,13 +242,13 @@ namespace ContentManagementSystemWebAPI.Controllers
             var user = await this.context.Users.FindAsync(id);
             if (user == null)
             {
-                return NotFound("User not found");
+                return NotFound(new ApiResponse { Message = "User not found", Result = null });
             }
 
             this.context.Users.Remove(user);
             await this.context.SaveChangesAsync();
 
-            return Ok(new { Message = "User deleted successfully", Result = user });
+            return Ok(new ApiResponse { Message = "User deleted successfully", Result = user });
         }
 
         [HttpPost("articles")]
@@ -240,7 +260,7 @@ namespace ContentManagementSystemWebAPI.Controllers
                 Content = contentDto.Body,
                 Image = contentDto.ImageUrl,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow // Assuming this should be set on creation
+                UpdatedAt = DateTime.UtcNow
             };
 
             this.context.Articles.Add(article);
@@ -283,6 +303,39 @@ namespace ContentManagementSystemWebAPI.Controllers
             await this.context.SaveChangesAsync();
 
             return Ok(new ApiResponse { Message = "Article deleted successfully", Result = article });
+        }
+
+        [HttpGet("users/search")]
+        public async Task<ActionResult<ApiResponse>> GetUsersWithSearch(
+            [FromQuery] string? username,
+            [FromQuery] string? email,
+            [FromQuery] string? mobile)
+            {
+                var query = this.context.Users.AsQueryable();
+
+                if (!string.IsNullOrEmpty(username))
+                {
+                    query = query.Where(u => u.Username.Equals(username));
+                }
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    query = query.Where(u => u.Email.Equals(email));
+                }
+
+                if (!string.IsNullOrEmpty(mobile))
+                {
+                    query = query.Where(u => u.Mobile.Equals(mobile));
+                }
+
+                var users = await query.ToListAsync();
+
+                if (users.Count == 0)
+                {
+                    return NotFound(new ApiResponse { Message = "User not found", Result = null });
+                }
+
+                return Ok(new ApiResponse { Message = "Users", Result = users });
         }
 
 
