@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ContentManagementSystemWebAPI.Controllers
 {
@@ -25,23 +26,7 @@ namespace ContentManagementSystemWebAPI.Controllers
             public string Message { get; set; }
         }
 
-        [HttpGet("articles")]
-        public async Task<ActionResult<ApiResponse>> GetArticles()
-        {
-            var articles = await this.context.Articles.ToListAsync();
-            return Ok(new ApiResponse { Message = "Articles", Result = articles });
-        }
-
-        [HttpGet("articles/{id}")]
-        public async Task<ActionResult<ApiResponse>> GetArticle(int id)
-        {
-            var article = await this.context.Articles.FindAsync(id);
-            if (article == null)
-            {
-                return NotFound(new ApiResponse { Message = "Article not found", Result = null });
-            }
-            return Ok(new ApiResponse { Message = "Article", Result = article });
-        }
+        
 
         [HttpGet("articlecategories")]
         public async Task<ActionResult<ApiResponse>> GetArticleCategories()
@@ -251,7 +236,25 @@ namespace ContentManagementSystemWebAPI.Controllers
             return Ok(new ApiResponse { Message = "User deleted successfully", Result = user });
         }
 
-        [HttpPost("articles")]
+        [HttpGet("articles")]
+        public async Task<ActionResult<ApiResponse>> GetArticles()
+        {
+            var articles = await this.context.Articles.ToListAsync();
+            return Ok(new ApiResponse { Message = "Getting all Articles at once", Result = articles });
+        }
+       
+        [HttpGet("articles/{id}")]
+        public async Task<ActionResult<ApiResponse>> GetArticle(int id)
+        {
+            var article = await this.context.Articles.FindAsync(id);
+            if (article == null)
+            {
+                return NotFound(new ApiResponse { Message = "No Such Article Is Found", Result = null });
+            }
+            return Ok(new ApiResponse { Message = "Required Article", Result = article });
+
+        }
+            [HttpPost("articles")]
         public async Task<ActionResult<ApiResponse>> CreateArticle([FromBody] ContentDto contentDto)
         {
             var article = new Article
@@ -260,37 +263,68 @@ namespace ContentManagementSystemWebAPI.Controllers
                 Content = contentDto.Body,
                 Image = contentDto.ImageUrl,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                CreatedDate = DateTime.UtcNow,
+                CreatedOn = DateTime.UtcNow,
+                ModifiedDate = DateTime.UtcNow,
+                CreatedBy = contentDto.CreatedBy,
+                ModifiedBy = contentDto.ModifiedBy,
+                Title1 = contentDto.Title1,
+                Title2 = contentDto.Title2,
+                Description = contentDto.Description,
+                Type = contentDto.Type,
+                Title3 = contentDto.Title3,
+                URLButtonName = contentDto.URLButtonName,
+                URL = contentDto.URL,
+                Section = contentDto.Section,
+                IsActive = contentDto.IsActive
             };
 
             this.context.Articles.Add(article);
             await this.context.SaveChangesAsync();
 
             return Ok(new ApiResponse { Message = "Article created successfully", Result = article });
+
         }
 
 
+       
         [HttpPut("articles/{id}")]
         public async Task<ActionResult<ApiResponse>> UpdateArticle(int id, [FromBody] ContentDto contentDto)
         {
             var article = await this.context.Articles.FindAsync(id);
             if (article == null)
             {
-                return NotFound("Article not found");
+                return NotFound("Atricle not found");
             }
 
             article.Title = contentDto.Title ?? article.Title;
             article.Content = contentDto.Body ?? article.Content;
             article.Image = contentDto.ImageUrl ?? article.Image;
             article.UpdatedAt = DateTime.UtcNow;
-
+            article.Title1 = contentDto.Title1 ?? article.Title1;
+            article.Title2 = contentDto.Title2 ?? article.Title2;
+            article.Title3 = contentDto.Title3 ?? article.Title3;
+            article.CreatedAt = DateTime.UtcNow;
+            article.Section = contentDto.Section ?? article.Section;
+            article.ModifiedDate = DateTime.UtcNow;
+            article.CreatedDate = DateTime.UtcNow;
+            article.Description = contentDto.Description ?? article.Description;
+            article.CreatedBy = contentDto.CreatedBy ?? article.CreatedBy;
+            article.ModifiedBy = contentDto.ModifiedBy ?? article.ModifiedBy;
+            article.URLButtonName = contentDto.URLButtonName ?? article.URLButtonName;
+               article.URL = contentDto.URL ?? article.URL;
+                article.Section = contentDto.Section ?? article.Section;
+                article.IsActive = contentDto.IsActive ?? article.IsActive;
+            article.Type = contentDto.Type ?? article.Type;
             await this.context.SaveChangesAsync();
 
             return Ok(new ApiResponse { Message = "Article updated successfully", Result = article });
+
         }
 
 
-        [HttpDelete("articles/{id}")]
+            [HttpDelete("articles/{id}")]
         public async Task<ActionResult<ApiResponse>> DeleteArticle(int id)
         {
             var article = await this.context.Articles.FindAsync(id);
